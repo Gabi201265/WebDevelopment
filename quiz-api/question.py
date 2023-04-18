@@ -3,7 +3,7 @@ import dbController as db
 import classQuestion
 import json
 import random
-#from asyncio.windows_events import NULL
+from asyncio.windows_events import NULL
 
 def CreateNewQuestion(request):
     #Récupérer le token envoyé en paramètre
@@ -13,22 +13,26 @@ def CreateNewQuestion(request):
     objJson = request.get_json()
     if token:
         print("saveQuestion")
-        print(getNumberOfQuestion())
+        print("NbOfQuestions : " + str(getNumberOfQuestion()))
         saveQuestion(request)
-        print(deserialize_question(objJson))
         return {"ok": token , "id": objJson}, 200
     else:
         return 'Unauthorized', 401
 
 def serialize_question(question):
-    #La question est sérialisée en JSON à l'aide de la fonction json.dumps()
-    return json.dumps({
-        'id': question.id,
-        'title': question.title,
-        'position': question.position,
-        'text': question.text,
-        'image': question.image
-    })
+    #LPour convertir la liste en question [(36, 1, 'Dummy Question', "Quelle est la couleur du cheval blanc d'Henry IV ?", 'falseb64imagecontent')]
+    #ID
+    id = (question[0][0])
+    #position
+    position = (question[0][1])
+    #title
+    title = (question[0][2])
+    #texte
+    text = (question[0][3])
+    #reponses
+    image = (question[0][4])
+    
+    return classQuestion.Question(id, position, title,text, image, NULL)
 
 def deserialize_question(data):
     json_data = data
@@ -49,7 +53,7 @@ def saveQuestion(request):
 	try:
 		question = deserialize_question(objJson)
 		#Ajout d'une question
-		if (question.position > (getNumberOfQuestion())-1):
+		if (question.position > (getNumberOfQuestion())):
 			addQuestion(request, question)
 		else:
 			insertQuestion(request, question)
@@ -101,44 +105,92 @@ def addQuestion(request, question):
     #in case of exception, rollback the transaction
     #cur.execute('rollback')
 
+#Permet d'update les questions !
+#def updateQuestion(request, index):
+    # objJson = request.get_json()
+    # try:
+    #     #ajout question vide
+    #     index= int(index)
+    #     createQuestion = deserialize_question(objJson)
+    #     a = 0
+    #     b = 0
+    #     parcours = 0
+    #     if ( index > createQuestion.position):
+    #         b = createQuestion.position
+    #         a = index
+    #         parcours = -1
+    #     else:
+    #        a = index 
+    #        b = createQuestion.position
+    #        parcours = 1
+    #     for i in range(a, b, parcours):
+    #         questionJSON = json.loads(getQuestionsinfos(i+ parcours))
+    #         question = classQuestion.Question(questionJSON['id'], questionJSON['position'], questionJSON['title'], questionJSON['text'], questionJSON['image'],questionJSON['possibleAnswers'])
+    #         try:
+    #             updateDB(question, i)
+    #         except Exception as e:
+    #             print(e)
+    #             return '', 404
+    #     updateDB(createQuestion, createQuestion.position)
+    #     return '', 200
+    # except Exception as e:
+    #         print(e)
+    #         return '', 404
 
+
+#Insertion d'une question (ne fonctionne pas)
 def insertQuestion(request, question):
     print("insertQuestion")
     indexCurrQuestion = question.position
     totalCount = getNumberOfQuestion()
-
+    
+    title = str(question.title).replace("'","''")
+    text = str(question.text).replace("'","''")
     try:
         #ajout d'une question vide
-        createQuestion = classQuestion.Question(0, totalCount, "title", "text", "img",[])
-        createQuestion.position += 1
+        createQuestion = classQuestion.Question(0, totalCount+1, "title", "text", "img",[])
         addQuestion(request, createQuestion)
-
-        for i in range(totalCount+1, indexCurrQuestion, -1):
+        
+        lastQuestion = serialize_question(getQuestion(totalCount))
+        
+        for i in range(indexCurrQuestion+1, totalCount+1):
+            print("i :" +str(i))
             #classQuestion.questionToJSON(classQuestion.addResponses(question))
-            questionJSON = deserialize_question(question)
-            createQuestion = classQuestion.Question(questionJSON['id'], questionJSON['position'], questionJSON['title'], questionJSON['text'], questionJSON['image'],questionJSON['possibleAnswers'])
-            updateDB(createQuestion, i)
+            print("je passe par la bas")
+            #On doit récupérer la question associé à sa position
+            nextQuestion = serialize_question(getQuestion(i-1))
+            print(str(nextQuestion))
             
+            #On actualise en remplaçant la question par la notre
+            print("je passe par ici")
+            createQuestion = classQuestion.Question(nextQuestion.id, nextQuestion.position + 1, nextQuestion.title, nextQuestion.text, nextQuestion.image, nextQuestion.responses)
+            print("je passe par la")
+            #On update
+            updateDB(createQuestion, i)
+        
+        #On update la question en question mtn que tout est décalé     
         updateDB(question, indexCurrQuestion)
+        
+        #On update la dernière question
+        updateDB(lastQuestion, totalCount+1)
         return 'Ok', 200
     except Exception as e:
         print(e)
         return 'Error', 404
 
 def updateDB(question, index):
-    cur = db.dbConnection()
-    
+    print("updateDB")
+    cur = db.dBConnection()
     title = str(question.title).replace("'","''")
-    text = str(question.texte).replace("'","''")
+    text = str(question.text).replace("'","''")
     query = (
     f"UPDATE questions "
-    f"SET Title = '{title}',"
-    f" Texte = '{text}',"
-    f" Image = '{question.image}',"
-    f" Position = '{index}',"
-    f" ID = '{question.id}'"
-    f"WHERE Position = "
-    f"{index};"
+    f"SET title = '{title}',"
+    f" text = '{text}',"
+    f" image = '{question.image}',"
+    f" position = '{index}',"
+    f" id = '{question.id}'"
+    f"WHERE position = {index}; "
     )
     try:
         cur.execute("begin")
@@ -186,9 +238,15 @@ def getNumberOfQuestion():
 	except Exception as e:
 		return 'Error', 404
         
-        
-        
-        
-        
-# def addQuestion(request, question):
+def getQuestion(index):
+    cur = db.dBConnection()
+    cur.execute("begin")
+    #serializing(req)
+    maQuery = cur.execute(
+        f"SELECT * FROM questions where position == {index};"
+    )
+    quest = maQuery.fetchall()
+    cur.execute("commit")
+    print("ok")
+    return quest
     

@@ -22,7 +22,7 @@ class Question():
         question_dict = json.loads(self)
         #Ce dictionnaire est ensuite utilisé pour initialiser une instance de la classe Question à l'aide de l'opérateur **, qui permet de déballer un dictionnaire en arguments nommés.
         return Question(**question_dict)
-
+    
     def addResponses(self, responses):
         print("reponses questions to json")
         print(responses)
