@@ -14,7 +14,8 @@ def hello_world():
 
 @app.route('/quiz-info', methods=['GET'])
 def GetQuizInfo():
-	return {"size": 0, "scores": []}, 200
+	#return {"size": 0, "scores": []}, 200
+	return question.GetQuizInfo()
 
 @app.route('/login', methods=['POST'])
 def GetQuizLogin():
@@ -32,12 +33,24 @@ def GetQuizLogin():
 def Question():
     return question.CreateNewQuestion(request)
 
-
 #################Fin de la partie guidée
-@app.route('/questions/<index>', methods=['GET'])
-def getQuestion(index):
-	return question.getQuestion(request, index)
+@app.route('/rebuild-db', methods=['POST'])
+def rebuildDB():
+     return question.rebuildDB()
 
+@app.route('/questions/<index>', methods=['GET'])
+def getQuestionByID(index):
+     return question.getQuestionByID(index)
+
+@app.route('/questions', methods=['GET'])
+def getQuestionByPosition():     
+     #If key doesn't exist, return None
+     position = request.args.get('position')
+     if (position == None):
+          return 'Position is missing', 400
+     else:
+          return question.getQuestionByPosition(position)
+     
 @app.route('/questions/<index>', methods=['PUT'])
 def updateQuestion(index):
 	return question.updateQuestion(request, index)
@@ -46,13 +59,18 @@ def updateQuestion(index):
 def deleteQuestion(index):
 	return question.deleteQuestion(request, index)
 
-# @app.route('/participations', methods=['POST'])
-# def addParticipation():
-# 	return participation.addParticipation(request)
+@app.route('/questions/all', methods=['DELETE'])
+def deleteAllQuestion():
+	return question.deleteAllQuestion(request)
 
-# @app.route('/participations', methods=['DELETE'])
-# def deleteParticipation():
-# 	return participation.deleteParticipation(request)
+
+@app.route('/participations', methods=['POST'])
+def addParticipation():
+	return participation.addParticipation(request)
+
+@app.route('/participations/all', methods=['DELETE'])
+def deleteAllParticipation():
+	return participation.deleteAllParticipation(request)
 
 if __name__ == "__main__":
     app.run()

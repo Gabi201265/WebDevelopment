@@ -1,9 +1,10 @@
+#Pour avoir la missing key
+from collections import defaultdict
 import json
 
 
-
 class Question():
-    def __init__(self, id : int, position : int, title : str, text : str, image : str, responses):
+    def __init__(self, id, position, title, text, image, responses):
         self.id = id
         self.position = position
         self.title = title
@@ -11,28 +12,20 @@ class Question():
         self.image = image
         self.responses = responses
 
-    def questionToJSON(self):
         #La méthode __dict__ est utilisée pour obtenir un dictionnaire contenant les attributs de l'instance de la classe Question
         #Ce dictionnaire est ensuite sérialisé en JSON à l'aide de la fonction json.dumps()
-        question_json = json.dumps(self.__dict__)
-        return question_json
-    
-    def questionToPython(self):
         #json.loads() est utilisée pour convertir une chaîne JSON en un dictionnaire Python
-        question_dict = json.loads(self)
-        #Ce dictionnaire est ensuite utilisé pour initialiser une instance de la classe Question à l'aide de l'opérateur **, qui permet de déballer un dictionnaire en arguments nommés.
-        return Question(**question_dict)
     
-    def addResponses(self, responses):
+    def questionToJSON(self, reponsesData):
         print("reponses questions to json")
-        print(responses)
+        print(reponsesData)
         dict_reponses = []
-        for reponse in responses :
-            if (reponse[1].lower() == 'true'):
-                dict_reponses.append({'text': str(reponse[0]),'isCorrect': True})
+        for reponse in reponsesData :
+            if (reponse[3].lower() == 'true'):
+                dict_reponses.append({'text': str(reponse[2]),'isCorrect': True})
             else:
-                dict_reponses.append({'text': str(reponse[0]),'isCorrect': False})
-        dict = {
+                dict_reponses.append({'text': str(reponse[2]),'isCorrect': False})
+        dict_data = {
             'id' : self.id,
             'position' : self.position,
             'text' : self.text,
@@ -40,4 +33,5 @@ class Question():
             'image': self.image,
             'possibleAnswers' : dict_reponses,
         }
-        return Question(dict)
+        my_json = json.dumps(dict_data)
+        return my_json
