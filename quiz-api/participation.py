@@ -19,7 +19,6 @@ def addParticipation(request):
                cur.execute("begin")
                cur.execute(query)
                cur.execute("commit")
-               print("dedans")
                return {"playerName": playerName, "score": score}, 200
           else:
                return 'Bad Request', 400

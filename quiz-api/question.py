@@ -24,7 +24,7 @@ def GetQuizInfo():
         # On crée la liste à partir du fetchall que l'on a récupéré
         list_scores = []
         for score in scores :
-            list_scores.append({'playerName': str(score[0]),'score': score[2]})
+            list_scores.append({'playerName': str(score[1]),'score': score[2]})
     
         return {"size": size, "scores": list_scores}, 200
     except Exception as e: 
@@ -32,17 +32,10 @@ def GetQuizInfo():
         return '',401
 
 def CreateNewQuestion(request):
-    # Récupérer le token envoyé en paramètre
-    token = request.headers.get('Authorization')
-    # print(tokenDecode)
-    # récupèrer un l'objet json envoyé dans le body de la requète
-    objJson = request.get_json()
-    if token:
-        print("saveQuestion")
-        print("NbOfQuestions : " + str(getNumberOfQuestion()))
-        return saveQuestion(request)
-    else:
-        return 'Unauthorized', 401
+    print("saveQuestion")
+    print("NbOfQuestions : " + str(getNumberOfQuestion()))
+    return saveQuestion(request)
+
 
 
 def serialize_question(question):
@@ -85,31 +78,27 @@ def retrieve_last_autoincremented_ID():
         cur.execute('rollback')
         return 'Unauthorized', 401
     
-    
-    
 # Enregistre la question
 def saveQuestion(request):
     # récupèrer un l'objet json envoyé dans le body de la requète
     objJson = request.get_json()
     question = deserialize_question(objJson)
     # Ajout d'une question
-    # if (question.position > (getNumberOfQuestion())):
-    if(addQuestion(request, question)):
-        print(retrieve_last_autoincremented_ID())
-        return {'id' : retrieve_last_autoincremented_ID() }, 200
+    if (question.position > (getNumberOfQuestion())):
+        if(addQuestion(question)):
+            print(retrieve_last_autoincremented_ID())
+            return {'id' : retrieve_last_autoincremented_ID() }, 200
+        else:
+            return 'Unauthorized', 401
     else:
-        return 'Unauthorized', 401
-    # else:
-    #     if(insertQuestion(request, question)):
-    #         return {'id' : retrieve_last_autoincremented_ID }, 200
-    #     else:
-    #         return 'Unauthorized', 401
+        if(insertQuestion(question)):
+            return {'id' : retrieve_last_autoincremented_ID() }, 200
+        else:
+            return 'Unauthorized', 401
 
 
 # Ajout d'une question
-
-
-def addQuestion(request, question):
+def addQuestion(question):
     print("addQuestion")
     try:
         title = str(question.title).replace("'", "''")
@@ -149,43 +138,53 @@ def addQuestion(request, question):
         return True
     except Exception as e:
         return False
-# Insertion d'une question (ne fonctionne pas)
-
-
-def insertQuestion(request, question):
+    
+    
+    
+# Insertion d'une question 
+def insertQuestion(question):
     print("insertQuestion")
-    indexCurrQuestion = question.position
-    totalCount = getNumberOfQuestion()
-    print("indexCurrQuestion : " + str(indexCurrQuestion))
+    # Décaler les questions existantes à partir de la position spécifiée
     try:
-        # ajout d'une question vide
-        createQuestion = classQuestion.Question(
-            0, totalCount+1, "title", "text", "img", [])
-        addQuestion(request, createQuestion)
-        print("getQuestion(totalCount)[0] : " +
-              str(getQuestion(totalCount)[0]))
-
-        lastQuestion = serialize_question(getQuestion(totalCount)[0])
-
-        for i in range(indexCurrQuestion+1, totalCount+1):
-            # classQuestion.questionToJSON(classQuestion.addResponses(question))
-            # On doit récupérer la question associé à sa position
-            nextQuestion = serialize_question(getQuestion(i-1)[0])
-            print(str(nextQuestion))
-
-            # On actualise en remplaçant la question par la notre
-            createQuestion = classQuestion.Question(
-                nextQuestion.id, nextQuestion.position + 1, nextQuestion.title, nextQuestion.text, nextQuestion.image, nextQuestion.responses)
-            print("je passe par la")
-            # On update
-            updateDB(createQuestion, i)
-
-        # On update la question en question mtn que tout est décalé
-        updateDB(question, indexCurrQuestion)
-
-        # On update la dernière question
-        updateDB(lastQuestion, totalCount+1)
+        cur = db.dBConnection()
+        # Décale toutes les questions
+        queryQuestion = (
+            f"UPDATE questions "
+            f"SET position = position + 1 "
+            f"WHERE position >= {question.position}; "
+        )
+        # Décale toutes les réponses associées 
+        queryReponse = (
+            f"UPDATE reponses "
+            f"SET positionQuestion = positionQuestion + 1 "
+            f"WHERE positionQuestion >= {question.position}; "
+        )
+        # Insère la nouvelle question
+        title = str(question.title).replace("'", "''")
+        text = str(question.text).replace("'", "''")
+        queryNewQuestion= (
+            f"INSERT INTO questions (position, title, text, image) VALUES"
+            f"({question.position},'{title}','{text}','{question.image}');"
+        )
+        cur.execute("begin")
+        cur.execute(queryQuestion)
+        cur.execute(queryReponse)
+        cur.execute(queryNewQuestion)
+        cur.execute("commit")
+        
+        # Insertion des réponses dans la DB
+        i = 1
+        for reponse in question.responses:
+            reponse['text'] = reponse['text'].replace("'", "''")
+            query = (
+                f"INSERT INTO reponses VALUES ({i}, {question.position}, '{reponse['text']}', '{reponse['isCorrect']}' )"
+            )
+            cur.execute("begin")
+            cur.execute(query)
+            cur.execute("commit")
+            i = i+1
         return True
+    
     except Exception as e:
         print(e)
         return False
@@ -263,150 +262,221 @@ def getQuestionByPosition(position):
 # UPDATE
 def updateQuestion(request, index):
     print("UpdateQuestion")
-    #On récupère l'ancienne question pour avoir l'ancienne position pour update les réponses associés
-    oldQuestion = getQuestionByID(index)[0]
-    oldQuestion = json.loads(oldQuestion)
-    print("oldQuestion['position'] : " +str(oldQuestion['position']))
-    oldPosition = oldQuestion['position']
     objJson = request.get_json()
     question = deserialize_question(objJson)
     try:
         title = str(question.title).replace("'", "''")
         text = str(question.text).replace("'", "''")
         cur = db.dBConnection()
-        query = (
-            f"UPDATE questions "
-            f"SET title = '{title}',"
-            f" text = '{text}',"
-            f" image = '{question.image}',"
-            f" position = '{question.position}',"
-            f" id = '{index}'"
-            f"WHERE id = {index}; "
+        
+        # On vérifie que la question existe bien
+        cur.execute("begin")
+        query = cur.execute(
+            f"SELECT * FROM questions where id == {index};"
         )
-        try:
+        quest = query.fetchall()
+        cur.execute("commit")
+        if not quest:
+            return 'Error, question doesnt exist', 404
+        
+        # Supprime, décale tout et insère ! 
+        # Mathématiquement : 
+        # +1 des positions dans l'intervalle >=dest et <source QUAND positionSource > positionDestination
+        # -1 des positions dans l'intervalle >source et <=dest QUAND positionSource < positionDestination
+        
+        
+        positionDest = question.position
+        positionSource = quest[0][1]
+        
+        
+        if positionDest==positionSource:
+            query = (
+                f"UPDATE questions "
+                f"SET title = '{title}',"
+                f" text = '{text}',"
+                f" image = '{question.image}',"
+                f" position = '{question.position}',"
+                f" id = '{index}'"
+                f"WHERE id = {index}; "
+            )
             cur.execute("begin")
             cur.execute(query)
             cur.execute("commit")
-        except Exception as e:
-            print(e)
-            cur.execute('rollback')
-            return 'Unauthorized', 401
-
-        # Actualisation des réponses dans la DB
-        i = 1
-        print("question.responses " + str(question.responses))
-        for reponse in question.responses:
-            print(str(reponse['text']))
-            reponse['text'] = reponse['text'].replace("'", "''")
-            query = (
-                f"UPDATE reponses "
-                f"SET position = '{i}',"
-                f" positionQuestion = '{question.position}',"
-                f" text = '{reponse['text']}',"
-                f" isCorrect = '{reponse['isCorrect']}'"
-                f"WHERE positionQuestion = {oldPosition}; "
-            )
-            try:
+            
+            # Insertion des nouvelles réponses dans la DB
+            i = 1
+            print("question.responses " + str(question.responses))
+            for reponse in question.responses:
+                print(str(reponse['text']))
+                reponse['text'] = reponse['text'].replace("'", "''")
+                query = (
+                    f"UPDATE reponses "
+                    f"SET position = '{i}',"
+                    f" positionQuestion = '{question.position}',"
+                    f" text = '{reponse['text']}',"
+                    f" isCorrect = '{reponse['isCorrect']}'"
+                    f"WHERE positionQuestion = {question.position}; "
+                )
                 cur.execute("begin")
                 cur.execute(query)
                 cur.execute("commit")
-            except Exception as e:
-                cur.execute('rollback')
-                return 'Unauthorized', 401
-            i = i+1
+                i = i+1
+            return '', 204
+        
+        else :
+            # SUPPRESSION
+            # delete reponses associées à la question marche pas il faut delete les anciennes reponses, donc il faut récuperer l'ancienne position question
+            query = (
+                f"DELETE FROM reponses WHERE positionQuestion = {positionSource};"
+            )
+            cur.execute("begin")
+            cur.execute(query)
+            cur.execute("commit")
+            
+            # delete de la question
+            query = (
+                f"DELETE FROM questions WHERE id = {index};")
+            cur.execute("begin")
+            cur.execute(query)
+            cur.execute("commit")
+            
+            # REORDONANCEMENT 
+            if positionDest < positionSource :
+                # Décale toutes les questions
+                queryQuestion = (
+                    f"UPDATE questions "
+                    f"SET position = position + 1 "
+                    f"WHERE position >= {positionDest} AND position < {positionSource};"
+                )
+                # Décale toutes les réponses associées 
+                queryReponse = (
+                    f"UPDATE reponses "
+                    f"SET positionQuestion = positionQuestion + 1 "
+                    f"WHERE positionQuestion >= {positionDest} AND positionQuestion < {positionSource};"
+                )
+            else :
+                # Décale toutes les questions
+                queryQuestion = (
+                    f"UPDATE questions "
+                    f"SET position = position - 1 "
+                    f"WHERE position <= {positionDest} AND position > {positionSource};"
+                )
+                # Décale toutes les réponses associées 
+                queryReponse = (
+                    f"UPDATE reponses "
+                    f"SET positionQuestion = positionQuestion - 1 "
+                    f"WHERE positionQuestion <= {positionDest} AND positionQuestion > {positionSource};"
+                )
+            cur.execute("begin")
+            cur.execute(queryQuestion)
+            cur.execute(queryReponse)
+            cur.execute("commit")
+            
+            
+            # INSERTION
+            # Insère la nouvelle question
+            title = str(question.title).replace("'", "''")
+            text = str(question.text).replace("'", "''")
+            query= (
+                f"INSERT INTO questions (id, position, title, text, image) VALUES"
+                f"({index}, {question.position},'{title}','{text}','{question.image}');"
+            )
+            cur.execute("begin")
+            cur.execute(query)
+            cur.execute("commit")
+            
+            # Insertion des nouvelles réponses dans la DB
+            i = 1
+            print("question.responses " + str(question.responses))
+            for reponse in question.responses:
+                print(str(reponse['text']))
+                reponse['text'] = reponse['text'].replace("'", "''")
+                query = (
+                    f"INSERT INTO reponses VALUES ({i}, {question.position}, '{reponse['text']}', '{reponse['isCorrect']}' )"
+                )
+                cur.execute("begin")
+                cur.execute(query)
+                cur.execute("commit")
+                i = i+1
+            return '', 204
+    except Exception as e:
+        return 'Error', 404
+    
+    
+# DELETE
+def deleteQuestion(request, index):
+    cur = db.dBConnection()
+    # verifie si l'index est correct 
+    cur.execute("begin")
+    query = cur.execute(
+        f"SELECT * FROM questions where id == {index};"
+    )
+    quest = query.fetchall()
+    cur.execute("commit")
+    if not quest:
+        return 'Error', 404
+    
+    # delete reponses associées à la question
+    query = (
+        f"DELETE FROM reponses WHERE positionQuestion = (SELECT position FROM questions WHERE id = {index})"
+    )
+    cur.execute("begin")
+    cur.execute(query)
+    cur.execute("commit")
+    
+    # delete de la question
+    query = (
+        f"DELETE FROM questions WHERE id = {index}")
+    cur.execute("begin")
+    cur.execute(query)
+    cur.execute("commit")
+    
+    # réordonnancement de la BDD
+    # Décale toutes les questions
+    queryQuestion = (
+        f"UPDATE questions "
+        f"SET position = position - 1 "
+        f"WHERE position > {quest[0][1]}; "
+    )
+    # Décale toutes les réponses associées 
+    queryReponse = (
+        f"UPDATE reponses "
+        f"SET positionQuestion = positionQuestion - 1 "
+        f"WHERE positionQuestion > {quest[0][1]}; "
+    )
+    cur.execute("begin")
+    cur.execute(queryQuestion)
+    cur.execute(queryReponse)
+    cur.execute("commit")
+    
+    return 'Ok', 204
+
+
+def deleteAllQuestion():
+    try:
+        cur = db.dBConnection()
+        queryQuestion=("DELETE FROM QUESTIONS;")
+        queryReponse=("DELETE FROM REPONSES;")
+        queryParticipations=("DELETE FROM PARTICIPATIONS;")
+        cur.execute("begin")
+        cur.execute(queryQuestion)
+        cur.execute(queryReponse)
+        cur.execute(queryParticipations)
+        cur.execute("commit")
         return '', 204
     except Exception as e:
         return 'Error', 404
-# DELETE
-def deleteQuestion(request, index):
-    # Récupérer le token envoyé en paramètre
-    token = request.headers.get('Authorization')
-    nbQuestion = getNumberOfQuestion()
-    if (token):
-        try:
-            deleteQuestionInDB(request, index)
-
-            return 'OK', 204
-
-        except Exception as e:
-            return 'Error', 404
-    else:
-        return 'Unauthorized', 401
-
-
-def deleteAllQuestion(request):
-    # Récupérer le token envoyé en paramètre
-    token = request.headers.get('Authorization')
-    nbQuestion = getNumberOfQuestion()
-    if (token):
-        try:
-            for i in range(1, nbQuestion+1):
-                deleteQuestionInDB(request, i)
-            return '', 204
-        except Exception as e:
-            return 'Error', 404
-    else:
-        return 'Unauthorized', 401
-
-
-# Permet d'update la db
-def updateDB(question, pos):
-    print("updateDB")
-    cur = db.dBConnection()
-    title = str(question.title).replace("'", "''")
-    text = str(question.text).replace("'", "''")
-    query = (
-        f"UPDATE questions "
-        f"SET title = '{title}',"
-        f" text = '{text}',"
-        f" image = '{question.image}',"
-        f" position = '{pos}',"
-        f" id = '{question.id}'"
-        f"WHERE position = {pos}; "
-    )
-    try:
-        cur.execute("begin")
-        cur.execute(query)
-        cur.execute("commit")
-    except Exception as e:
-        print(e)
-        return 'Error', 404
-
 
 def getNumberOfQuestion():
     try:
         cur = db.dBConnection()
         cur.execute("begin")
-        maQuery = cur.execute(f"SELECT count(*) FROM questions")
-        nb = maQuery.fetchall()[0][0]
+        query = cur.execute(f"SELECT count(*) FROM questions")
+        nb = query.fetchall()[0][0]
         cur.execute("commit")
         return nb
     except Exception as e:
         return 'Error', 404
-
-
-def deleteQuestionInDB(request, index):
-    cur = db.dBConnection()
-    maQuery = (
-        f"DELETE FROM questions WHERE id = {index}")
-    try:
-        cur.execute("begin")
-        cur.execute(maQuery)
-        cur.execute("commit")
-    except Exception as e:
-        return '', 401
-
-    # delete reponses associées
-    maQuery = (
-        f"DELETE FROM reponses WHERE positionQuestion = {index}"
-    )
-    try:
-        cur.execute("begin")
-        cur.execute(maQuery)
-        cur.execute("commit")
-    except Exception as e:
-        cur.execute('rollback')
-        return '', 401
 
 def rebuildDB():
     queryParticipation = ("DELETE FROM PARTICIPATIONS;")
@@ -442,16 +512,3 @@ def getRightAnswer(index):
     except Exception as e:
         print(e)
         return '', 401
-# def getRightAnswer(index):
-#     print("getRightAnswer")
-#     try:
-#         cur = db.dBConnection()
-#         cur.execute("begin")
-#         result = cur.execute("SELECT position FROM reponses WHERE isCorrect = \"True\" AND positionQuestion = ?",(index))
-#         score = result.fetchall()
-#         cur.execute("commit")
-#         print("Score : " + str(score))
-#         return score
-#     except Exception as e:
-#         print(e)
-#         return '', 401

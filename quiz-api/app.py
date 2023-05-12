@@ -29,9 +29,25 @@ def GetQuizLogin():
 	else:
 		return 'Unauthorized', 401
 
+def checkAuth():
+     # Récupérer le token envoyé en paramètre
+     token = request.headers.get('Authorization')
+     if (token):
+          try : 
+               decode_token(token.replace("Bearer ", ""))
+               return True
+          except Exception as e:
+               print(e)
+               return False
+     else:
+          return False
+     
 @app.route('/questions', methods=['POST'])
 def Question():
-    return question.CreateNewQuestion(request)
+     if (checkAuth()):
+          return question.CreateNewQuestion(request)
+     else:
+          return 'Unauthorized', 401
 
 #################Fin de la partie guidée
 @app.route('/rebuild-db', methods=['POST'])
@@ -57,12 +73,17 @@ def updateQuestion(index):
 
 @app.route('/questions/<index>', methods=['DELETE'])
 def deleteQuestion(index):
-	return question.deleteQuestion(request, index)
-
+     if (checkAuth()):
+          return question.deleteQuestion(request, index)
+     else:
+          return 'Unauthorized', 401
+     
 @app.route('/questions/all', methods=['DELETE'])
 def deleteAllQuestion():
-	return question.deleteAllQuestion(request)
-
+     if (checkAuth()):
+          return question.deleteAllQuestion()
+     else:
+          return 'Unauthorized', 401
 
 @app.route('/participations', methods=['POST'])
 def addParticipation():
