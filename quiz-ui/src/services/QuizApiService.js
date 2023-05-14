@@ -28,9 +28,13 @@ export default {
       });
   },
   getQuizInfo() {
-    //return this.call("get", "quiz-info");
+    return this.call("get", "quiz-info");
   },
   getQuestion(position) {
-    // not implemented
+    return this.call("get", `questions/${position}`);
+  },
+  async postScore(player){
+    return this.call("post", "participations", player)
   }
+
 };
