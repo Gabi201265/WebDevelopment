@@ -69,8 +69,10 @@ def getQuestionByPosition():
      
 @app.route('/questions/<index>', methods=['PUT'])
 def updateQuestion(index):
-	return question.updateQuestion(request, index)
-
+     if (checkAuth()):
+          return question.updateQuestion(request, index)
+     else:
+          return 'Unauthorized', 401
 @app.route('/questions/<index>', methods=['DELETE'])
 def deleteQuestion(index):
      if (checkAuth()):

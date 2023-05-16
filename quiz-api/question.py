@@ -83,8 +83,8 @@ def saveQuestion(request):
     # récupèrer un l'objet json envoyé dans le body de la requète
     objJson = request.get_json()
     question = deserialize_question(objJson)
-    # Ajout d'une question
-    if (question.position > (getNumberOfQuestion())):
+    print("Qestion.position : " + str(question.position))
+    if ( int(question.position) > (getNumberOfQuestion())):
         if(addQuestion(question)):
             print(retrieve_last_autoincremented_ID())
             return {'id' : retrieve_last_autoincremented_ID() }, 200
