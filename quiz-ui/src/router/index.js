@@ -4,6 +4,9 @@ import NewQuizPage from '../views/NewQuizPage.vue'
 import QuestionsManager from '../views/QuestionsManager.vue'
 import QuestionAdminDisplay from '../views/QuestionAdminDisplay.vue'
 import ScoreBoard from '../views/ScoreBoard.vue'
+import QuestionsList from '../views/QuestionsList.vue'
+import QuestionCreation from '../views/QuestionCreation.vue'
+import QuestionEdition from '../views/QuestionEdition.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +35,22 @@ const router = createRouter({
       path: '/scoreboard/:score',
       name: 'ScoreBoard',
       component: ScoreBoard
+    },
+    {
+      path: '/question-list',
+      name: 'QuestionsList',
+      component: QuestionsList
+    },
+    {
+      path: '/question-creation',
+      name: 'QuestionCreation',
+      component: QuestionCreation
+    },
+    {
+      path: '/question-edit/:myEditedQuestion',
+      name: 'QuestionEdition',
+      component: QuestionEdition,
+      props: true
     },
     {
       path: '/about',

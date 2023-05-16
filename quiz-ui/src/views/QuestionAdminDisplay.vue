@@ -1,12 +1,9 @@
 <template>
     <div class="admin">
         <h1>Page administrateur</h1>
-        <div v-show="display">
-        <p>Saissiez le mot de passe :</p>
-        <input type="text" v-model="password" style="color:black"/>
-        <button class="OkButton" @click="loginAdmin">Valider le mot de passe</button>
-        <p>{{message}}</p>
-        </div>
+          <input type="text" placeholder="Password" v-model="password" style="color:black"/>
+          <button @click="loginAdmin">Connexion</button>
+          <p>{{message}}</p>
     </div>
 </template>
   
@@ -14,38 +11,32 @@
 import quizApiService from "@/services/QuizApiService";
 
 export default {
-    name: "AdminVue",
-    data() {
-        return {
-            display:true,
-            password : "",
-            message : ""
-        }
-    },
-
-    methods:{
-        async loginAdmin(){
-        var body = {
-            "password": this.password
-        }
-        var loginPromise = quizApiService.loginAdmin(body);
-        var loginAPIResult = await loginPromise;
-        try{
-            if (loginAPIResult.status == 200){
-            this.message = "right password";
-            console.log(loginAPIResult);
-            this.display = !this.display;
-            //saving token
-            window.localStorage.setItem("token", loginAPIResult.data.token);
-            this.$router.push('/question-list');
-            }
-        }
-        catch(error){
-            this.message = "mot de passe incorrect";
-        }
-        },
-        async logoutAdmin(){
-        },
+  name: "AdminVue",
+  data() {
+    return {
+      password : "",
+      message : ""
     }
+  },
+
+  methods: {
+    async loginAdmin(){
+      var body = {
+        "password": this.password
+      }
+      const loginAPIResult = await quizApiService.loginAdmin(body);
+      try{
+        if (loginAPIResult.status == 200){
+          this.message = "password valid";
+          //saving token
+          window.localStorage.setItem("token", loginAPIResult.data.token);
+          this.$router.push('/question-list');
+        }
+      }
+      catch(error){
+        this.message = "password invalid";
+      }
+    }
+  }
 };
 </script>

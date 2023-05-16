@@ -31,10 +31,31 @@ export default {
     return this.call("get", "quiz-info");
   },
   getQuestion(position) {
-    return this.call("get", `questions/${position}`);
+    return this.call("get", `questions?position=${position}`);
   },
+  // getQuestionByPosition(position) {
+  //   return this.call("get", `questions/position?${position}`);
+  // },
+  // getQuestionById(index) {
+  //   return this.call("get", `questions/${index}`);
+  // },
   async postScore(player){
-    return this.call("post", "participations", player)
+    return this.call("post", "participations", player);
+  },
+  async loginAdmin(pwd){
+    return this.call("post", "login", pwd)
+  },
+  async deleteParticipation(){
+    return this.call("delete", "participations/all");
+  },
+  async createQuestion(question, token){
+    return this.call("post", "questions", question, token);
+  },
+  async deleteQuestion(index, token){
+    return this.call("delete", `questions/${index}`, null, token);
+  },
+  async updateQuestion(index, question, token){
+    return this.call("put", `questions/${index}`, question, token);
   }
 
 };

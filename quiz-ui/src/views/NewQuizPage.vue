@@ -1,11 +1,10 @@
 <template>
   <form>
     <div class="mb-3">
-      <label for="playerName" class="form-label h5 text-white">Entrez votre nom :</label>
-      <input type="text" class="form-control form-control-lg" id="playerName" placeholder="Votre nom"
+      <input required type="text" id="playerName" placeholder="Votre nom" style="color:black"
         v-model="username" />
     </div>
-    <button @click="launchNewQuiz" type="submit" class="btn btn-primary btn-lg w-100 rounded-pill">
+    <button :disabled="!username" @click="launchNewQuiz" type="submit" class="btn btn-primary btn-lg w-100 rounded-pill">
       Découvrir mon avenir
     </button>
   </form>
@@ -30,3 +29,29 @@ export default {
   }
 }
 </script>
+
+
+<style scoped>
+
+@keyframes shake{
+  0%, 100% {translate: 0;}
+  25% {translate: 8px 0;}
+  75% {translate: -8px 0;}
+}
+input {
+  width: 210px;
+  height: 56px;
+  padding: 0 16px;
+  background: transparent;
+  border-radius: 4px;
+  border: 1px solid #fe4567;
+  color: #f9f9f9;
+  animation: shake 0.14s 3;
+}
+
+input:valid {
+  border-color: #45feaf;
+  animation: none;
+}
+
+</style>
