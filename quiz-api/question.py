@@ -314,15 +314,14 @@ def updateQuestion(request, index):
                     f"SET position = '{i}',"
                     f" positionQuestion = '{question.position}',"
                     f" text = '{reponse['text']}',"
-                    f" isCorrect = '{reponse['isCorrect']}'"
-                    f"WHERE positionQuestion = {question.position}; "
+                    f" isCorrect = '{reponse['isCorrect']}' "
+                    f"WHERE positionQuestion = {question.position} AND position = {i};"
                 )
                 cur.execute("begin")
                 cur.execute(query)
                 cur.execute("commit")
                 i = i+1
             return '', 204
-        
         else :
             # SUPPRESSION
             # delete reponses associées à la question marche pas il faut delete les anciennes reponses, donc il faut récuperer l'ancienne position question
@@ -389,6 +388,7 @@ def updateQuestion(request, index):
             i = 1
             print("question.responses " + str(question.responses))
             for reponse in question.responses:
+                print("i : " + (str(i)))
                 print(str(reponse['text']))
                 reponse['text'] = reponse['text'].replace("'", "''")
                 query = (
@@ -458,10 +458,12 @@ def deleteAllQuestion():
         queryQuestion=("DELETE FROM QUESTIONS;")
         queryReponse=("DELETE FROM REPONSES;")
         queryParticipations=("DELETE FROM PARTICIPATIONS;")
+        querySQL=("DELETE FROM SQLITE_SEQUENCE;")
         cur.execute("begin")
         cur.execute(queryQuestion)
         cur.execute(queryReponse)
         cur.execute(queryParticipations)
+        cur.execute(querySQL)
         cur.execute("commit")
         return '', 204
     except Exception as e:

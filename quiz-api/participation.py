@@ -56,3 +56,15 @@ def getScore(data):
           return score
      except Exception as e:
           print(e)
+          
+def getAllParticipations():
+     try:
+          # Récupération des scores de chaque joueur
+          cur = db.dBConnection()
+          cur.execute("begin")
+          query = cur.execute(f"SELECT * FROM participations ORDER BY score DESC")
+          scores = query.fetchall()
+          return {'scores': scores}, 200
+     except Exception as e:
+          print(e)
+          return '', 401

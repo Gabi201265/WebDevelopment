@@ -93,7 +93,14 @@ def addParticipation():
 
 @app.route('/participations/all', methods=['DELETE'])
 def deleteAllParticipation():
-	return participation.deleteAllParticipation(request)
+     if (checkAuth()):
+          return participation.deleteAllParticipation(request)
+     else:
+          return 'Unauthorized', 401
+
+@app.route('/classement', methods=['GET'])
+def getAllParticipations():
+    return participation.getAllParticipations()
 
 if __name__ == "__main__":
     app.run()
