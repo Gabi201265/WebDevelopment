@@ -27,7 +27,7 @@
 
 <style scoped>
 header {
-  background-color: black;
+  background-color: transparent;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
@@ -40,15 +40,15 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 1rem;
 }
 
 .logo {
+  padding-left: 0.5rem;
   display: block;
-  width: 20%;
+  width: 18%;
   height: 100%;
+  max-height: 4rem;
 }
 
 nav ul {
@@ -56,24 +56,68 @@ nav ul {
   list-style: none;
   margin: 0;
   padding: 0;
+  padding-right: 3rem;
 }
 
 nav li {
-  margin-left: 1rem;
+  margin-left: 2.5rem;
+  list-style: none;
 }
 
 nav a {
-  color: #7cc4fb;
+  color: aliceblue;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 1.2rem;
-  transition: color 0.2s ease-in-out;
+  font-size: 2rem;
+  letter-spacing: 1px;
 }
 
 nav a:hover {
-  color: #8c4ad8;
+  background: linear-gradient(45deg, #7cc4fb, #8c4ad8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
-.main-content {
-  margin-top: 5rem;
+
+nav a::before {
+  content: "";
+  position: absolute;
+  height: 5px;
+  bottom: -1em;
+  width: 0;
+  border-radius: 50px;
+  background: linear-gradient(45deg, #7cc4fb, #8c4ad8);
+  transition: 0.5s;
+}
+
+nav a:hover::before {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .logo {
+    width: 40%;
+    max-height: 2.5rem;
+  }
+
+  nav ul {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  nav li {
+    margin: 0 0.5rem;
+  }
+  nav a::before {
+    bottom: -0.7em;
+  }
 }
 </style>

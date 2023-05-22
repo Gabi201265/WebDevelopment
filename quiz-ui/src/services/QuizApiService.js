@@ -45,8 +45,11 @@ export default {
   async loginAdmin(pwd){
     return this.call("post", "login", pwd)
   },
-  async deleteParticipation(){
-    return this.call("delete", "participations/all");
+  async deleteParticipation(token){
+    return this.call("delete", "participations/all", null, token);
+  },
+  async deleteAllQuestions(token){
+    return this.call("delete", "questions/all", null, token);
   },
   async createQuestion(question, token){
     return this.call("post", "questions", question, token);
@@ -56,6 +59,9 @@ export default {
   },
   async updateQuestion(index, question, token){
     return this.call("put", `questions/${index}`, question, token);
+  },
+  async getAllParticipations(){
+    return this.call("get", "classement");
   }
 
 };

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="createQuestion">
       <h1>Create question</h1>
       <div >
         <p>Position</p>
@@ -85,14 +85,10 @@ export default {
 
       // La position, insertion ou ajout !
       this.position = parseInt(this.position, 10);
-      if (this.position === '') {
+      if (!this.position || isNaN(this.position)) {
         this.position = this.totalNumberOfQuestion + 1;
+        console.log("Good !");
       }
-      else if (isNaN(this.position)) {
-        console.log("La position doit être un nombre !");
-        return; 
-      }
-
       var question = {
         "position": this.position,
         "title": this.title,
@@ -112,4 +108,13 @@ export default {
   }
 }; 
 </script>
+<style>
+.createQuestion{
+  color: white;
+  flex-direction: column;
+  padding: 2rem;
+  margin-top: 5rem;
+  color: #FFFFFF;
+}
+</style>
  

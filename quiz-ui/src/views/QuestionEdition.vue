@@ -22,14 +22,14 @@
         <p>Answers (check the right answer)</p>
         <div>
           <div v-for="(answer, index) in possibleAnswers" :key="index">
-            <input type="radio" :value="index" v-model="selectedAnswerIndex" @change="updatePossibleAnswers()">
-            <input type="text" v-model="answer.text" :placeholder="answer.text">
+            <input type="radio" :value="index" v-model="correctAnswerIndex" @change="updatePossibleAnswers()">
+            <input type="text" v-model="answer.text" :placeholder="answer.text" @change="updatePossibleAnswers()">
           </div>
         </div>
       </div>
     </div>
     <button @click="backToQuestionList" class="glow-on-hover">Back to question list</button>
-    <button v-bind:disabled="selectedAnswerIndex === null" @click="editQuestion" class="glow-on-hover">Edit</button>
+    <button v-bind:disabled="correctAnswerIndex === null" @click="editQuestion" class="glow-on-hover">Edit</button>
   </div>
 </template>
 
@@ -54,7 +54,7 @@ export default {
       image:"",
       possibleAnswer : [],
       position: 0,
-      selectedAnswerIndex: null
+      correctAnswerIndex: null
     };
   },
   components:{
@@ -64,12 +64,13 @@ export default {
     this.question = this.$route.params.myEditedQuestion;
     if(this.question){
       this.question = JSON.parse(this.question);
-      this.id = this.question.id,
-      this.title = this.question.title,
-      this.text = this.question.text,
-      this.image = this.question.image,
-      this.possibleAnswers = this.question.possibleAnswers,
-      this.position = this.question.position
+      this.id = this.question.id;
+      this.title = this.question.title;
+      this.text = this.question.text;
+      this.image = this.question.image;
+      this.possibleAnswers = this.question.possibleAnswers;
+      this.position = this.question.position;
+      this.correctAnswerIndex = this.possibleAnswers.findIndex(answer => answer.isCorrect);
     }
   },
   methods: {
@@ -78,7 +79,7 @@ export default {
         const token = window.localStorage.getItem("token");
         console.log(token);
         const questionDeleteAPIResult = await quizApiService.deleteQuestion(this.question.id, token);
-        this.$router.push('/admin');
+        this.$router.push('/question-list');
       }
       catch(error){
         console.log(error);
@@ -91,15 +92,13 @@ export default {
       this.image = b64String;
     },
     updatePossibleAnswers() {
-      // Réinitialise tous les indicateurs "isCorrect" à false
-      this.possibleAnswers.forEach(answer => {
-        answer.isCorrect = false;
+      console.log("Ca chane!");
+      this.possibleAnswers.forEach((answer, index) => {
+        answer.isCorrect = (index === this.correctAnswerIndex);
+        answer.text = this.possibleAnswers[index].text;
+        console.log(answer.text);
       });
-
-      // Met à jour la réponse sélectionnée avec isCorrect à true
-      if (this.selectedAnswerIndex !== null) {
-        this.possibleAnswers[this.selectedAnswerIndex].isCorrect = true;
-      }
+      console.log(this.possibleAnswers);
     },
     async editQuestion(){
       this.position = parseInt(this.position, 10);
@@ -125,6 +124,10 @@ export default {
 
 <style>
 .QuestionEdition{
-  background: aliceblue;
+  color: white;
+  flex-direction: column;
+  padding: 2rem;
+  margin-top: 5rem;
+  color: #FFFFFF;
 }
 </style>
