@@ -2,7 +2,6 @@ import dbController as db
 import random
 import json
 import question as quest
-from asyncio.windows_events import NULL
 
 def addParticipation(request):
      participationJSON = request.get_json()
