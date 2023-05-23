@@ -3,7 +3,7 @@ import sqlite3
 def create_database():
     try:
         # Création d'une connexion à la base de données (le fichier sera créé s'il n'existe pas)
-        conn = sqlite3.connect('quizDatabase.db')
+        conn = sqlite3.connect('quiz.db')
         cursor = conn.cursor()
 
         # Suppression des tables existantes si elles existent déjà
