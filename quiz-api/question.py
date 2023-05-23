@@ -3,7 +3,7 @@ import dbController as db
 import classQuestion
 import json
 import random
-from asyncio.windows_events import NULL
+
 
 def GetQuizInfo():
     try:
@@ -192,7 +192,7 @@ def insertQuestion(question):
 # GETbyID
 def getQuestionByID(index):
     print("getQuestionByID")
-    quest = NULL
+    quest = None
     try:
         print("index " + str(index))
         cur = db.dBConnection()
@@ -206,7 +206,7 @@ def getQuestionByID(index):
         if not quest:
             return 'Error', 404
         
-        myQuestion = classQuestion.Question(quest[0][0], quest[0][1], quest[0][2], quest[0][3], quest[0][4], NULL)
+        myQuestion = classQuestion.Question(quest[0][0], quest[0][1], quest[0][2], quest[0][3], quest[0][4], None)
         print("Question : ok")
 
         # Partie réponses
@@ -228,7 +228,7 @@ def getQuestionByID(index):
 # GETbyPosition
 def getQuestionByPosition(position):
     print("getQuestionByPosition")
-    quest = NULL
+    quest = None
     try:
         cur = db.dBConnection()
         cur.execute("begin")
@@ -241,7 +241,7 @@ def getQuestionByPosition(position):
         if not quest:
             return 'Error', 404
         
-        myQuestion = classQuestion.Question(quest[0][0], quest[0][1], quest[0][2], quest[0][3], quest[0][4], NULL)
+        myQuestion = classQuestion.Question(quest[0][0], quest[0][1], quest[0][2], quest[0][3], quest[0][4], None)
         print("Question : ok")
 
         # Partie réponses
