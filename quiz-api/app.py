@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS
 import hashlib
 from jwt_utils import build_token, decode_token
-import question, participation
+import question, participation, generateDb
 
 app = Flask(__name__)
 CORS(app)
@@ -52,7 +52,10 @@ def Question():
 #################Fin de la partie guidée
 @app.route('/rebuild-db', methods=['POST'])
 def rebuildDB():
-     return question.rebuildDB()
+     if (checkAuth()):
+          return generateDb.create_database()
+     else:
+          return 'Unauthorized', 401
 
 @app.route('/questions/<index>', methods=['GET'])
 def getQuestionByID(index):

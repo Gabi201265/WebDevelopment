@@ -479,26 +479,7 @@ def getNumberOfQuestion():
         return nb
     except Exception as e:
         return 'Error', 404
-
-def rebuildDB():
-    queryParticipation = ("DELETE FROM PARTICIPATIONS;")
-    queryQuestions=("DELETE FROM QUESTIONS;")
-    querySQL=("DELETE FROM SQLITE_SEQUENCE;")
-    queryResponses=("DELETE FROM REPONSES;")
     
-    try:
-        cur = db.dBConnection()
-        cur.execute("begin")
-        cur.execute(queryParticipation)
-        cur.execute(queryQuestions)
-        cur.execute(querySQL)
-        cur.execute(queryResponses)
-        cur.execute("commit")
-        return 'Ok', 200
-    except Exception as e:
-        print(e)
-        return 'Unauthorized', 401
-
 def getRightAnswer(index):
     print("getRightAnswer")
     try:
