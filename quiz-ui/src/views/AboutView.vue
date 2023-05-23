@@ -4,7 +4,7 @@
     <div class="row">
       <div class="col-md-4">
         <div class="card">
-          <img src="@/assets/photos/hug.jpg" alt="Hugo" />
+          <img src="/src/assets/photos/hug.jpg" alt="Hugo" />
           <h3>Hugo</h3>
           <p class="pAbout">Co-Founder & CEO</p>
           <p class="pAbout">Hugo is passionate about empowering people to reach their full potential and achieve their goals. He brings a wealth of experience in business development and management to BrokenMinds.</p>
@@ -12,7 +12,7 @@
       </div>
       <div class="col-md-4">
         <div class="card">
-          <img src="@/assets/photos/val.jpg" alt="Valentin" />
+          <img src="/src/assets/photos/val.jpg" alt="Valentin" />
           <h3>Valentin</h3>
           <p class="pAbout">Co-Founder & CMO</p>
           <p class="pAbout">Valentin is an experienced marketer with a talent for crafting compelling brand stories. She leads the marketing and branding efforts at BrokenMinds, ensuring that our message resonates with our target audience.</p>
@@ -20,7 +20,7 @@
       </div>
       <div class="col-md-4">
         <div class="card">
-          <img src="@/assets/photos/gab.jpg" alt="Gabriel" />
+          <img src="/src/assets/photos/gab.jpg" alt="Gabriel" />
           <h3>Gabriel</h3>
           <p class="pAbout">Co-Founder & CTO</p>
           <p class="pAbout">Gabriel is a creative problem-solver with a passion for technology. He leads the development efforts at BrokenMinds, ensuring that our platform is robust, scalable, and user-friendly.</p>
@@ -31,10 +31,10 @@
     <br>Whether you're an entrepreneur, a student, a professional, or anyone looking to improve their life, BrokenMinds has something to offer. Join our community today and start your journey to greatness!</p>
     <div class="social-links">
         <a href="https://www.instagram.com/la_mushrooom/">
-        <img src="@/assets/icons/instagram.svg" alt="Instagram" />
+        <img src="/src/assets/icons/instagram.svg" alt="Instagram" />
       </a>
       <a href="https://github.com/Gabi201265/quiz-app">
-        <img src="@/assets/icons/github.svg" alt="Github" />
+        <img src="/src/assets/icons/github.svg" alt="Github" />
       </a>
     </div>
   </div>
