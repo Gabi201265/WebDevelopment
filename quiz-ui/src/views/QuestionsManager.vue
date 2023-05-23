@@ -54,7 +54,6 @@ export default {
       const questionInfo = await quizApiService.getQuestion(currentPosition);
       if (questionInfo.status === 200) {
         this.currentQuestion = questionInfo.data;
-        console.log(this.currentQuestion);
       } else {
         console.error("Error, could not load current question.");
       }
@@ -63,10 +62,8 @@ export default {
       console.log("Select answer with the position: " + selectedAnswerPosition);
       this.player.answers[this.currentQuestionPosition - 1] = selectedAnswerPosition + 1;
       let rightAnswer = this.getRightAnswer();
-      console.log("rightAnswer : " + this.getRightAnswer());
       if (rightAnswer === selectedAnswerPosition) {
         this.score++;
-        console.log("Score: " + this.score);
       }
       if (this.currentQuestionPosition === this.totalNumberOfQuestion) {
         this.endQuiz();
@@ -77,15 +74,12 @@ export default {
     },
     async endQuiz() {
       const postPlayerResult = await quizApiService.postScore(this.player);
-      console.log("Total Score: " + this.score);
       participationStorageService.saveParticipationScore(this.score);
-      console.log(participationStorageService.getParticipationScore());
       this.$router.push(`/scoreboard/${this.score}`);
     },
     getRightAnswer() {
       let i = 0;
       for (const answer of this.currentQuestion.possibleAnswers) {
-        console.log(answer);
         if (answer.isCorrect) return i;
         else i++;
       }

@@ -92,13 +92,10 @@ export default {
       this.image = b64String;
     },
     updatePossibleAnswers() {
-      console.log("Ca chane!");
       this.possibleAnswers.forEach((answer, index) => {
         answer.isCorrect = (index === this.correctAnswerIndex);
         answer.text = this.possibleAnswers[index].text;
-        console.log(answer.text);
       });
-      console.log(this.possibleAnswers);
     },
     async editQuestion(){
       this.position = parseInt(this.position, 10);
@@ -111,7 +108,6 @@ export default {
       }
       console.log(question);
       const token = window.localStorage.getItem("token");
-      console.log(this.id);
       const quizInfoAPIResult = await quizApiService.updateQuestion(this.id, question, token);
       this.$router.push('/question-list');
     },
