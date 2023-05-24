@@ -201,6 +201,7 @@ h2, h3 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  color: #2c3e50;
 }
 
 .scroll-link {
