@@ -28,6 +28,7 @@
 <style scoped>
 header {
   background-color: transparent;
+  backdrop-filter: blur(5px);
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;

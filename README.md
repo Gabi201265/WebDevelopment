@@ -24,6 +24,9 @@ After run et debu the backend
 
 
 
+Pour passer via docker : 
+
+https://g6.quiz-esiee.tech/
 
 Go to quiz-ui
 
